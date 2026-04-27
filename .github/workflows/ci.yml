@@ -10,8 +10,7 @@ on:
 
 env:
   CSV_URL: "MLproject/train_pca.csv"
-  # Wajib: atur tracking URI ke file lokal agar CI berjalan tanpa server HTTP
-  MLFLOW_TRACKING_URI: file:./mlruns
+  MLFLOW_TRACKING_URI: file://${{ github.workspace }}/mlruns
 
 jobs:
   build:
