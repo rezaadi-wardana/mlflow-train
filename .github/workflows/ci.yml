@@ -35,6 +35,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install mlflow scikit-learn pandas numpy
 
+      - name: Clean previous mlruns
+        run: rm -rf mlruns
+
+      - name: Initialize MLflow default experiment
+        run: |
+          mkdir -p mlruns/0
+          cat > mlruns/0/meta.yaml << EOF
+          artifact_location: mlflow-artifacts:/0
+          experiment_id: '0'
+          lifecycle_stage: active
+          name: Default
+          EOF
+          
       - name: Run mlflow project
         run: mlflow run MLproject --env-manager=local
 
