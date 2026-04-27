@@ -1,5 +1,5 @@
 name: CI
-
+ 
 on:
   push:
     branches:
@@ -7,46 +7,45 @@ on:
   pull_request:
     branches:
       - main
-
+ 
 env:
   CSV_URL: "MLproject/train_pca.csv"
-  MLFLOW_TRACKING_URI: file://${{ github.workspace }}/mlruns
-
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+ 
     steps:
-      # Checkout kode dari repository
+      # Checks-out your repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
-
+ 
       # Setup Python 3.12.7
       - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
           python-version: "3.12.7"
       
-      # Cek environment variable (opsional)
+      # Check Env Variables
       - name: Check Env
         run: |
           echo $CSV_URL
-
-      # Install dependencies (MLflow + requirements tambahan)
+ 
+      # Install mlflow
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mlflow scikit-learn pandas numpy
-
-      # Jalankan MLproject
+          pip install mlflow
+      
+      # Run as a mlflow project
       - name: Run mlflow project
         run: |
           mlflow run MLproject --env-manager=local 
-
-      # Simpan mlruns ke GitHub Repository
+ 
+      # Save models to GitHub Repository
       - name: Save mlruns to repo
         run: |
           git config --global user.name ${{ secrets.username }}
           git config --global user.email ${{ secrets.email }}
-          git add -f mlruns/          # -f untuk memaksa jika .gitignore mengabaikan
-          git commit -m "Save mlruns from CI run" || true
-          git push origin main        # pastikan branch = main
+          git add mlruns/
+          git commit -m "Save mlruns from CI run"
+          git push origin master
