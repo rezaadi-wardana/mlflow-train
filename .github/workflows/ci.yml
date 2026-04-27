@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  CSV_URL: "MLproject/train_pca.csv"
+  # Wajib: atur tracking URI ke file lokal agar CI berjalan tanpa server HTTP
+  MLFLOW_TRACKING_URI: file:./mlruns
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout kode dari repository
+      - uses: actions/checkout@v3
+
+      # Setup Python 3.12.7
+      - name: Set up Python 3.12.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12.7"
+      
+      # Cek environment variable (opsional)
+      - name: Check Env
+        run: |
+          echo $CSV_URL
+
+      # Install dependencies (MLflow + requirements tambahan)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mlflow scikit-learn pandas numpy
+
+      # Jalankan MLproject
+      - name: Run mlflow project
+        run: |
+          mlflow run MLproject --env-manager=local 
+
+      # Simpan mlruns ke GitHub Repository
+      - name: Save mlruns to repo
+        run: |
+          git config --global user.name ${{ secrets.username }}
+          git config --global user.email ${{ secrets.email }}
+          git add -f mlruns/          # -f untuk memaksa jika .gitignore mengabaikan
+          git commit -m "Save mlruns from CI run" || true
+          git push origin main        # pastikan branch = main
